@@ -1,8 +1,0 @@
-{
-    "name": "Heatmiser Wifi - deprecated",
-    "domains": [
-        "climate"
-    ],
-    "iot_class": "Local Polling",
-    "render_readme": true
-}
