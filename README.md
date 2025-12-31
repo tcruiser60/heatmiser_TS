@@ -7,7 +7,7 @@ Ian's version replicates the old Heatmiser App. and includes scheduleing and Hot
 
 
 ## Overview
-A [Heatmiser](http://www.heatmiser.com/) WiFi Thermostat Home Assistant plugin.
+A [Heatmiser](http://www.heatmiser.com/) WiFi Thermostat Home Assistant climate plugin.
 
 Supports:
 
