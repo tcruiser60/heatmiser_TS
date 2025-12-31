@@ -1,31 +1,45 @@
+# Heatmiser Wifi Platform for Home Assistant. Version 1.1
+# Updated to use latest Climate scheme for Home Assistant 2025.1
+
+
 """Heatmiser Wifi Platform for Home Assistant."""
 import logging
 
 from heatmiser_wifi import Heatmiser
+from homeassistant.const import (UnitOfTime)
+
 import voluptuous as vol
 
 import homeassistant.helpers.config_validation as cv
+#import datetime
 
 from homeassistant.components.climate import (
-    PLATFORM_SCHEMA, ClimateEntity)
+    PLATFORM_SCHEMA,
+    ClimateEntity,
+    HVACMode,
+    HVACAction,
+    ClimateEntityFeature)
 
 from homeassistant.components.climate.const import (
-    SUPPORT_TARGET_TEMPERATURE, SUPPORT_PRESET_MODE, HVAC_MODE_OFF,
-    HVAC_MODE_HEAT, CURRENT_HVAC_OFF, CURRENT_HVAC_HEAT,
-    CURRENT_HVAC_IDLE, PRESET_HOME, PRESET_AWAY)
+    PRESET_HOME,
+    PRESET_AWAY)
 
 from homeassistant.const import (
-    CONF_HOST, CONF_PORT, CONF_PIN, TEMP_CELSIUS, TEMP_FAHRENHEIT, 
-    ATTR_FRIENDLY_NAME, ATTR_TEMPERATURE)
+    CONF_HOST, CONF_PORT, CONF_PIN,
+    UnitOfTemperature,
+    ATTR_FRIENDLY_NAME,
+    ATTR_TEMPERATURE)
 
 _LOGGER = logging.getLogger(__name__)
 
 # Validation of the user's configuration
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_HOST): cv.string,
+    #vol.Optional(CONF_MAC): cv.string,
     vol.Optional(CONF_PORT, default=8068): cv.port,
     vol.Optional(CONF_PIN, default=0): cv.positive_int,
     vol.Optional(ATTR_FRIENDLY_NAME, default='_not_set_'): cv.string
+
 })
 
 
@@ -36,6 +50,8 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     port = config[CONF_PORT]
     pin = config[CONF_PIN]
     name = config[ATTR_FRIENDLY_NAME]
+    #mac = config[CONF_MAC]
+    #time_offset = 0
 
     # Add devices
     add_entities([HeatmiserWifi(host, port, pin, name)], True)
@@ -56,13 +72,13 @@ class HeatmiserWifi(ClimateEntity):
 
     @property
     def supported_features(self):
-        return SUPPORT_TARGET_TEMPERATURE | SUPPORT_PRESET_MODE
+        return ClimateEntityFeature.TARGET_TEMPERATURE |  ClimateEntityFeature.PRESET_MODE | ClimateEntityFeature.TURN_OFF | ClimateEntityFeature.TURN_ON
 
     @property
     def temperature_unit(self):
         if self._heatmiser_info['temperature_format'] == 'Celsius':
-            return TEMP_CELSIUS
-        return TEMP_FAHRENHEIT
+            return UnitOfTemperature.CELSIUS
+        return UnitOfTemperature.FAHRENHEIT 
 
     @property
     def current_temperature(self):
@@ -97,12 +113,12 @@ class HeatmiserWifi(ClimateEntity):
     @property
     def hvac_mode(self):
         if self._heatmiser_info['on_off'] == 'Off':
-            return HVAC_MODE_OFF
-        return HVAC_MODE_HEAT
+            return HVACMode.OFF
+        return HVACMode.HEAT
 
     @property
     def hvac_modes(self):
-        return [HVAC_MODE_OFF, HVAC_MODE_HEAT]
+        return [HVACMode.OFF, HVACMode.HEAT]
 
     @property
     def preset_mode(self):
@@ -117,10 +133,10 @@ class HeatmiserWifi(ClimateEntity):
     @property
     def hvac_action(self):
         if self._heatmiser_info['on_off'] == 'Off':
-            return CURRENT_HVAC_OFF
+            return HVACAction.OFF
         elif self._heatmiser_info['heating_is_currently_on']:
-            return CURRENT_HVAC_HEAT
-        return CURRENT_HVAC_IDLE
+            return HVACAction.HEATING
+        return HVACAction.IDLE
 
     @property
     def is_aux_heat(self):
@@ -142,9 +158,9 @@ class HeatmiserWifi(ClimateEntity):
 
     def set_hvac_mode(self, hvac_mode):
         on_off = 'On'
-        if hvac_mode == HVAC_MODE_OFF:
+        if hvac_mode == HVACMode.OFF:
             on_off = 'Off'
-        elif hvac_mode != HVAC_MODE_HEAT:
+        elif hvac_mode != HVACMode.HEAT:
             return # Invalid mode return
         self._heatmiser.connect()
         self._heatmiser.set_value('on_off', on_off)
@@ -161,10 +177,11 @@ class HeatmiserWifi(ClimateEntity):
         self._heatmiser.set_value('run_mode', run_mode)
         self._heatmiser_info = self._heatmiser.get_info() # Update
         self._heatmiser.disconnect()
-        
 
 
     def update(self):
         self._heatmiser.connect()
         self._heatmiser_info = self._heatmiser.get_info()
         self._heatmiser.disconnect()
+    
+#   hass.services.register("Sync_Clock", Sync_Clock)
