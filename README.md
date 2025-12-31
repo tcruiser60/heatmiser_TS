@@ -42,4 +42,4 @@ Add following configuration to Home Assistant configuration.yaml
 * [Home Assistant Heatmiser Core component](https://www.home-assistant.io/integrations/heatmiser/) for non WiFi versions of Heatmister Thermostats.
  
 ### Author and license
-This component is written by Joel Midstjärna and is licensed under the MIT License.
+This component is written by Joel Midstjärna and is licensed under the MIT License. Updated by Tim Moore.
