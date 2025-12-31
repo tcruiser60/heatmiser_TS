@@ -22,7 +22,7 @@ connected through an Heatmiser Ethernet HUB are supported by the
 [Home Assistant Heatmiser Core component](https://www.home-assistant.io/integrations/heatmiser/)
 
 
-Ti install copy the heatmiser_wifi directory and its contents to the 
+To install copy the heatmiser_wifi directory and its contents to the 
 Home Assistant /config/custom_components directory.
 
 ## Configuration
